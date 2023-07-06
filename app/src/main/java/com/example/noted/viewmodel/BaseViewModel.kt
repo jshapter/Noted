@@ -4,26 +4,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noted.data.Note
 import com.example.noted.data.NoteDao
-import com.example.noted.data.NotesState
+import com.example.noted.data.NoteState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class BaseViewModel(
     private val dao: NoteDao
 ): ViewModel() {
 
-    private val _state = dao.getAllNotes().map { NotesState(it) }
+    private val _notesMap = dao.getAllNotes().map { NoteState(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = NotesState()
+            initialValue = NoteState()
         )
-    val state = _state
+    val notesMap = _notesMap
 
-    private val _textState = MutableStateFlow(NotesState())
-    val textState = _textState
+    private val _uiState = MutableStateFlow(NoteState())
+    val uiState = _uiState
 
     fun getNote(
         id: Int,
@@ -31,4 +33,69 @@ class BaseViewModel(
         return dao.getNote(id)
     }
 
+    fun onEvent(event: NoteEvent) {
+        when(event) {
+
+            is NoteEvent.DeleteNote -> {
+                viewModelScope.launch {
+                    dao.deleteNote(event.note)
+                }
+            }
+
+            NoteEvent.HideNoteEditor -> {
+                _uiState.update { it.copy(
+                    isEditingNote = false
+                ) }
+            }
+
+            NoteEvent.HideNoteWriter -> {
+                _uiState.update { it.copy(
+                    isWritingNote = false
+                    ) }
+            }
+
+            NoteEvent.SaveNote -> {
+                val content = _uiState.value.content
+                val id = _uiState.value.id
+                if(content.isBlank()) {
+                    return
+                }
+                val note = id?.let {
+                    Note(
+                        id = it,
+                        content = content
+                    )
+                }
+                viewModelScope.launch {
+                    if (note != null) {
+                        dao.upsertNote(note)
+                    }
+                }
+            }
+
+            is NoteEvent.SetContent -> {
+                _uiState.update { it.copy(
+                    content = event.content
+                    ) }
+            }
+
+            is NoteEvent.SetId -> {
+                _uiState.update { it.copy(
+                    id = event.id
+                    ) }
+            }
+
+            NoteEvent.ShowNoteEditor -> {
+                _uiState.update { it.copy(
+                    isEditingNote = true
+                ) }
+            }
+
+            NoteEvent.ShowNoteWriter -> {
+                _uiState.update { it.copy(
+                    isWritingNote = true
+                    ) }
+            }
+        }
+    }
 }

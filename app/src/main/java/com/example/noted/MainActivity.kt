@@ -15,6 +15,7 @@ import com.example.noted.data.NoteDatabase
 import com.example.noted.ui.HomeScreen
 import com.example.noted.ui.theme.NotedTheme
 import com.example.noted.viewmodel.BaseViewModel
+import com.example.noted.viewmodel.NoteEvent
 
 class MainActivity : ComponentActivity() {
 
@@ -45,7 +46,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    HomeScreen(
+                        uiState = viewModel.uiState,
+                        notesMap = viewModel.notesMap,
+                        onEvent = viewModel::onEvent
+                    )
                 }
             }
         }
