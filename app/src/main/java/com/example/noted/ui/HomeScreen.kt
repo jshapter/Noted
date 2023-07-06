@@ -22,8 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.noted.data.NoteState
 import com.example.noted.viewmodel.NoteEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,9 +34,10 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    navController: NavController,
     uiState: MutableStateFlow<NoteState>,
     notesMap: StateFlow<NoteState>,
-    onEvent: (NoteEvent) -> (Unit)
+    onEvent: (NoteEvent) -> Unit
 ) {
 
     val collectedUiState: State<NoteState> = uiState.collectAsState()
@@ -47,7 +50,8 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    onEvent(NoteEvent.ShowNoteWriter)
+                    onEvent(NoteEvent.SetContent(""))
+                    navController.navigate(route = "new_note")
                 }
             ) {
                 Icon(Icons.Default.Add, contentDescription = "new note")
@@ -60,32 +64,29 @@ fun HomeScreen(
                 .padding(PaddingValues),
             contentAlignment = Alignment.Center
         ) {
-            if (collectedUiState.value.isEditingNote) {
-                NoteWriter(textState = textState, onEvent = onEvent)
+            if (noteList.isEmpty()) {
+                NoNotes()
             } else {
-                if (noteList.isEmpty()) {
-                    NoNotes()
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                    ) {
-                        items(items = noteList, key = { it.id }) { note ->
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onEvent(NoteEvent.ShowNoteEditor) }) {
-                                NoteCard(note = note)
-                            }
-                            if (collectedUiState.value.isWritingNote) {
-                                NoteEditor(note = note, textState = textState, onEvent = onEvent)
-                            }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    items(items = noteList, key = { it.id }) { note ->
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+
+                                onEvent(NoteEvent.SetContent(note.content))
+
+                                navController.navigate("edit_note/${note.id}")
+                            }) {
+                            NoteCard(note = note)
                         }
                     }
                 }
             }
-
         }
     }
 }

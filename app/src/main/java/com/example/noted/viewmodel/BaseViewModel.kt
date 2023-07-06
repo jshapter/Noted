@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BaseViewModel(
-    private val dao: NoteDao
+    val dao: NoteDao
 ): ViewModel() {
 
     private val _notesMap = dao.getAllNotes().map { NoteState(it) }
@@ -40,18 +40,6 @@ class BaseViewModel(
                 viewModelScope.launch {
                     dao.deleteNote(event.note)
                 }
-            }
-
-            NoteEvent.HideNoteEditor -> {
-                _uiState.update { it.copy(
-                    isEditingNote = false
-                ) }
-            }
-
-            NoteEvent.HideNoteWriter -> {
-                _uiState.update { it.copy(
-                    isWritingNote = false
-                    ) }
             }
 
             NoteEvent.SaveNote -> {
@@ -82,18 +70,6 @@ class BaseViewModel(
             is NoteEvent.SetId -> {
                 _uiState.update { it.copy(
                     id = event.id
-                    ) }
-            }
-
-            NoteEvent.ShowNoteEditor -> {
-                _uiState.update { it.copy(
-                    isEditingNote = true
-                ) }
-            }
-
-            NoteEvent.ShowNoteWriter -> {
-                _uiState.update { it.copy(
-                    isWritingNote = true
                     ) }
             }
         }
