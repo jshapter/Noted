@@ -12,11 +12,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.example.noted.data.NoteDatabase
-import com.example.noted.ui.HomeScreen
 import com.example.noted.ui.navigation.NavGraph
 import com.example.noted.ui.theme.NotedTheme
 import com.example.noted.viewmodel.BaseViewModel
-import com.example.noted.viewmodel.NoteEvent
 
 class MainActivity : ComponentActivity() {
 
@@ -25,7 +23,8 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             NoteDatabase::class.java,
             "notes.db"
-        ).allowMainThreadQueries()
+        )
+        //    .allowMainThreadQueries()
             .build()
     }
 
@@ -50,8 +49,7 @@ class MainActivity : ComponentActivity() {
                     NavGraph(
                         uiState = viewModel.uiState,
                         notesMap = viewModel.notesMap,
-                        onEvent = viewModel::onEvent,
-                        dao = viewModel.dao
+                        onEvent = viewModel::onEvent
                     )
                 }
             }
