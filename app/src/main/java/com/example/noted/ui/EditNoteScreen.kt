@@ -1,7 +1,5 @@
 package com.example.noted.ui
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -27,11 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -51,7 +48,6 @@ fun EditNoteScreen(
     onEvent(NoteEvent.GetNote(id))
 
     val collectedUiState: State<NoteState> = uiState.collectAsState()
-    Log.d(TAG, "State at EditNote : ${collectedUiState.value}")
 
     val note = collectedUiState.value.cachedNote
 
@@ -61,6 +57,12 @@ fun EditNoteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                ),
                 navigationIcon = {
                     IconButton(onClick = {
                         onEvent(NoteEvent.ResetState)
@@ -133,13 +135,6 @@ fun EditNoteScreen(
                     focusedBorderColor = MaterialTheme.colorScheme.background,
                     unfocusedBorderColor = MaterialTheme.colorScheme.background
                 ),
-                placeholder = {
-                    Text(
-                        text = "New note",
-                        fontStyle = FontStyle.Italic,
-                        modifier = Modifier.alpha(0.8f)
-                    )
-                },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences
                 )

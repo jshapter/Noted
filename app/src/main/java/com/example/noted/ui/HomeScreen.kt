@@ -1,7 +1,5 @@
 package com.example.noted.ui
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,7 +54,6 @@ fun HomeScreen(
 
     val uiStateCollected: State<NoteState> = uiState.collectAsState()
     val cachedNote = remember { uiStateCollected.value.cachedNote }
-    Log.d(TAG, "State at Home : ${uiStateCollected.value}")
 
     val notesState: State<NoteState> = notesMap.collectAsState()
     val noteList = notesState.value.notes
@@ -92,11 +89,10 @@ fun HomeScreen(
         topBar = {
              TopAppBar(
                  colors = TopAppBarDefaults.mediumTopAppBarColors(
-                     containerColor = MaterialTheme.colorScheme.inversePrimary,
+                     containerColor = MaterialTheme.colorScheme.primary,
                      navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
                      titleContentColor = MaterialTheme.colorScheme.onBackground,
                      actionIconContentColor = MaterialTheme.colorScheme.onBackground
-
                  ),
                  navigationIcon = {
                      IconButton(onClick = { /*TODO*/ }) {
@@ -111,7 +107,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.secondary,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp),
                 onClick = {
                     onEvent(NoteEvent.ResetState)
@@ -138,7 +134,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(vertical = 12.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(10.dp, top = 0.dp)
+                        .padding(start = 10.dp, top = 0.dp, end = 10.dp, bottom = 10.dp)
                 ) {
                     items(items = noteList, key = { it.id }) { note ->
                         Row(modifier = Modifier
