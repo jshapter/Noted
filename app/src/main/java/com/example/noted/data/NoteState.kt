@@ -2,9 +2,8 @@ package com.example.noted.data
 
 data class NoteState(
     val notes: List<Note> = emptyList(),
-    var id: Int? = 0,
-    var content: String = "",
-    var noteDeletedSnack: Boolean = false,
+    val id: Int? = 0,
+    val content: String = "",
     val cachedNote: Note? = null,
-    val selectedNote: Note? = null
+    var noteDeleted: Boolean = false
 )

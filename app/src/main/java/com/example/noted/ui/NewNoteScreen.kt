@@ -1,5 +1,7 @@
 package com.example.noted.ui
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,8 +45,8 @@ fun NewNoteScreen(
     uiState: MutableStateFlow<NoteState>,
     onEvent: (NoteEvent) -> Unit
 ) {
-
     val collectedUiState: State<NoteState> = uiState.collectAsState()
+    Log.d(TAG, "State at NewNote : ${collectedUiState.value}")
     val textState = remember { mutableStateOf(TextFieldValue(collectedUiState.value.content)) }
 
     Scaffold(
@@ -52,6 +54,7 @@ fun NewNoteScreen(
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
+                        onEvent(NoteEvent.ResetState)
                         navController.navigate(route = "home")
                     }
                     ) {
@@ -70,7 +73,6 @@ fun NewNoteScreen(
                     if (textState.value.text != "") {
                         IconButton(onClick = {
                             onEvent(NoteEvent.SetContent(textState.value.text))
-                            onEvent(NoteEvent.SetId(0))
                             onEvent(NoteEvent.SaveNote)
 
                             navController.navigate(route = "home")

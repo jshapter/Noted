@@ -36,8 +36,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.noted.data.Note
-import com.example.noted.data.NoteDao
 import com.example.noted.data.NoteState
 import com.example.noted.viewmodel.NoteEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,20 +46,25 @@ fun EditNoteScreen(
     navController: NavController,
     uiState: MutableStateFlow<NoteState>,
     onEvent: (NoteEvent) -> Unit,
-    id: Int?
+    id: Int
 ) {
+
     onEvent(NoteEvent.GetNote(id))
 
     val collectedUiState: State<NoteState> = uiState.collectAsState()
-    val noteState = remember { mutableStateOf(uiState.value.selectedNote) }
-    val note = noteState.value
-    val textState = remember { mutableStateOf(TextFieldValue(text = collectedUiState.value.content, selection = TextRange(collectedUiState.value.content.length))) }
+    Log.d(TAG, "State at EditNote : ${collectedUiState.value}")
+
+    val note = collectedUiState.value.cachedNote
+
+    val textState = remember { mutableStateOf(TextFieldValue(text = collectedUiState.value.content, selection = TextRange(
+        collectedUiState.value.content.length))) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
+                        onEvent(NoteEvent.ResetState)
                         navController.navigate(route = "home")
                     }
                     ) {
@@ -79,9 +82,6 @@ fun EditNoteScreen(
                 actions = {
                     IconButton(onClick = {
                         onEvent(NoteEvent.SetContent(textState.value.text))
-                        if (note != null) {
-                            onEvent(NoteEvent.SetId(note.id))
-                        }
                         onEvent(NoteEvent.SaveNote)
 
                         navController.navigate(route = "home")
@@ -94,7 +94,7 @@ fun EditNoteScreen(
                     }
                     IconButton(onClick = {
                         note?.let { NoteEvent.DeleteNote(it) }?.let { onEvent(it) }
-                        onEvent(NoteEvent.NoteDeleted(true))
+
                         navController.navigate(route = "home")
                     }
                     ) {

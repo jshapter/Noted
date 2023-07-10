@@ -1,31 +1,22 @@
 package com.example.noted.ui
 
-import android.content.ClipData.Item
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.AlertDialogDefaults.titleContentColor
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingActionButtonDefaults.containerColor
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,12 +51,24 @@ fun HomeScreen(
     notesMap: StateFlow<NoteState>,
     onEvent: (NoteEvent) -> Unit
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val uiStateCollected: State<NoteState> = uiState.collectAsState()
-    val noteDeletedSnackbar = uiStateCollected.value.noteDeletedSnack
+    val cachedNote = remember { uiStateCollected.value.cachedNote }
+    Log.d(TAG, "State at Home : ${uiStateCollected.value}")
+
+    val notesState: State<NoteState> = notesMap.collectAsState()
+    val noteList = notesState.value.notes
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val noteDeletedSnackbar = uiStateCollected.value.noteDeleted
 
     if (noteDeletedSnackbar) {
+        if (cachedNote != null) {
+            onEvent(NoteEvent.SetId(cachedNote.id))
+        }
+        if (cachedNote != null) {
+            onEvent(NoteEvent.SetContent(cachedNote.content))
+        }
         LaunchedEffect(snackbarHostState) {
             val snackbarResult = snackbarHostState.showSnackbar(
                 message = "Note deleted",
@@ -74,16 +77,14 @@ fun HomeScreen(
                 duration = SnackbarDuration.Long
             )
             when (snackbarResult) {
-                SnackbarResult.Dismissed -> Log.d(TAG,"Snackbar dismissed") // set snack boolean to false with on event.
-                SnackbarResult.ActionPerformed -> onEvent(NoteEvent.UndoDelete)
+                SnackbarResult.Dismissed -> onEvent(NoteEvent.ResetState)
+                SnackbarResult.ActionPerformed -> onEvent(NoteEvent.SaveNote)
             }
         }
     }
 
-    val notesState: State<NoteState> = notesMap.collectAsState()
-    val noteList = notesState.value.notes
-
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -112,9 +113,7 @@ fun HomeScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp),
                 onClick = {
-                    onEvent(NoteEvent.SetContent(""))
-                    onEvent(NoteEvent.GetNote(null))
-                    onEvent(NoteEvent.NoteDeleted(false))
+                    onEvent(NoteEvent.ResetState)
                     navController.navigate(route = "new_note")
                 }
             ) {
@@ -140,11 +139,10 @@ fun HomeScreen(
                     items(items = noteList, key = { it.id }) { note ->
                         Row(modifier = Modifier
                             .fillMaxWidth()
-                            .selectable(selected = false, enabled = true, onClick = {})
-                            .toggleable(value = false, enabled = true, onValueChange = {})
                             .clickable {
+                                onEvent(NoteEvent.ResetState)
+                                onEvent(NoteEvent.SetId(note.id))
                                 onEvent(NoteEvent.SetContent(note.content))
-                                onEvent(NoteEvent.NoteDeleted(false))
                                 navController.navigate("edit_note/${note.id}")
                             }) {
                             NoteCard(note = note)

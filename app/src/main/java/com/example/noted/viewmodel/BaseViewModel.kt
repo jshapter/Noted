@@ -33,73 +33,73 @@ class BaseViewModel(
     fun onEvent(event: NoteEvent) {
         when(event) {
 
-            is NoteEvent.DeleteNote -> {
-                _uiState.update { it.copy(
-                    cachedNote = event.note
-                ) }
+            is NoteEvent.GetNote -> {
                 viewModelScope.launch {
-                    repo.deleteNote(event.note)
-                }
-            }
-
-            NoteEvent.SaveNote -> {
-                val content = _uiState.value.content
-                val id = _uiState.value.id
-                if(content.isBlank()) {
-                    return
-                }
-                val note = id?.let {
-                    Note(
-                        id = it,
-                        content = content
-                    )
-                }
-                _uiState.update { it.copy(
-                    content = ""
-                ) }
-                viewModelScope.launch {
-                    if (note != null) {
-                        repo.upsertNote(note)
-                    }
-                }
-            }
-
-            is NoteEvent.SetContent -> {
-                _uiState.update { it.copy(
-                    content = event.content
+                    val cachedNote = repo.getNote(id = event.id)
+                    _uiState.update { it.copy(
+                        cachedNote = cachedNote
                     ) }
+                }
             }
 
             is NoteEvent.SetId -> {
                 _uiState.update { it.copy(
                     id = event.id
-                    ) }
-            }
-
-            is NoteEvent.NoteDeleted -> {
-                _uiState.update { it.copy(
-                    noteDeletedSnack = event.noteDeletedSnack
                 ) }
             }
 
-            is NoteEvent.UndoDelete -> {
-                val note = _uiState.value.cachedNote
+            is NoteEvent.SetContent -> {
+                _uiState.update { it.copy(
+                    content = event.content
+                ) }
+            }
+
+            NoteEvent.ResetState -> {
+                _uiState.update { it.copy(
+                    id = 0,
+                    content = "",
+                    cachedNote = null,
+                    noteDeleted = false
+                ) }
+            }
+
+            is NoteEvent.DeleteNote -> {
+                _uiState.update { it.copy(
+                    cachedNote = _uiState.value.id?.let { it1 -> Note(
+                        id = it1,
+                        content = _uiState.value.content
+                    ) }
+                ) }
+                viewModelScope.launch {
+                    repo.deleteNote(event.note)
+                }
+                _uiState.update { it.copy(
+                    content = "",
+                    id = 0,
+                    noteDeleted = true
+                ) }
+            }
+
+            NoteEvent.SaveNote -> {
+                if(_uiState.value.content.isBlank()) {
+                    return
+                }
+                val note = _uiState.value.id?.let {
+                    Note(
+                        id = it,
+                        content = _uiState.value.content
+                    )
+                }
+                _uiState.update { it.copy(
+                    content = "",
+                    id = 0,
+                    cachedNote = null,
+                    noteDeleted = false
+                ) }
                 viewModelScope.launch {
                     if (note != null) {
                         repo.upsertNote(note)
                     }
-                }
-                _uiState.update { it.copy(
-                    noteDeletedSnack = false
-                ) }
-            }
-
-            is NoteEvent.GetNote -> {
-                viewModelScope.launch {
-                    val selectedNote = event.id?.let { repo.getNote(it) }
-                    _uiState.update { it.copy(
-                        selectedNote = selectedNote
-                    ) }
                 }
             }
         }
