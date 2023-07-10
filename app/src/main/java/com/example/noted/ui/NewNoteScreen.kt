@@ -55,7 +55,11 @@ fun NewNoteScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         onEvent(NoteEvent.ResetState)
-                        navController.navigate(route = "home")
+                        navController.navigate(route = "home") {
+                            popUpTo(route = "home") {
+                                inclusive = true
+                            }
+                        }
                     }
                     ) {
                         Icon(
@@ -75,7 +79,11 @@ fun NewNoteScreen(
                             onEvent(NoteEvent.SetContent(textState.value.text))
                             onEvent(NoteEvent.SaveNote)
 
-                            navController.navigate(route = "home")
+                            navController.navigate(route = "home") {
+                                popUpTo(route = "home") {
+                                    inclusive = true
+                                }
+                            }
                         }
                         ) {
                             Icon(

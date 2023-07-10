@@ -23,9 +23,7 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             NoteDatabase::class.java,
             "notes.db"
-        )
-        //    .allowMainThreadQueries()
-            .build()
+        ).build()
     }
 
     private val viewModel by viewModels<BaseViewModel>(

@@ -48,7 +48,6 @@ fun EditNoteScreen(
     onEvent: (NoteEvent) -> Unit,
     id: Int
 ) {
-
     onEvent(NoteEvent.GetNote(id))
 
     val collectedUiState: State<NoteState> = uiState.collectAsState()
@@ -65,7 +64,11 @@ fun EditNoteScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         onEvent(NoteEvent.ResetState)
-                        navController.navigate(route = "home")
+                        navController.navigate(route = "home") {
+                            popUpTo(route = "home") {
+                                inclusive = true
+                            }
+                        }
                     }
                     ) {
                         Icon(
@@ -84,7 +87,11 @@ fun EditNoteScreen(
                         onEvent(NoteEvent.SetContent(textState.value.text))
                         onEvent(NoteEvent.SaveNote)
 
-                        navController.navigate(route = "home")
+                        navController.navigate(route = "home") {
+                            popUpTo(route = "home") {
+                                inclusive = true
+                            }
+                        }
                     }
                     ) {
                         Icon(
@@ -95,7 +102,11 @@ fun EditNoteScreen(
                     IconButton(onClick = {
                         note?.let { NoteEvent.DeleteNote(it) }?.let { onEvent(it) }
 
-                        navController.navigate(route = "home")
+                        navController.navigate(route = "home") {
+                            popUpTo(route = "home") {
+                                inclusive = true
+                            }
+                        }
                     }
                     ) {
                         Icon(

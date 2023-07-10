@@ -5,12 +5,14 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -91,10 +93,10 @@ fun HomeScreen(
         topBar = {
              TopAppBar(
                  colors = TopAppBarDefaults.mediumTopAppBarColors(
-                     containerColor = MaterialTheme.colorScheme.primary,
-                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                     containerColor = MaterialTheme.colorScheme.inversePrimary,
+                     navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                     actionIconContentColor = MaterialTheme.colorScheme.onBackground
 
                  ),
                  navigationIcon = {
@@ -130,11 +132,14 @@ fun HomeScreen(
             if (noteList.isEmpty()) {
                 Text(text = "no notes to show...")
             } else {
+                val scrollState = rememberLazyListState()
                 LazyColumn(
+                    state = scrollState,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = 12.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(10.dp)
+                        .padding(10.dp, top = 0.dp)
                 ) {
                     items(items = noteList, key = { it.id }) { note ->
                         Row(modifier = Modifier
